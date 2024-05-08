@@ -38,9 +38,9 @@ phases:
       - echo Start manifest deployment..
       - kubectl apply -f .kubernetes/aws/service-account.yaml 
       - kubectl apply -f .kubernetes/aws/configmap.yaml
+      - kubectl apply -f .kubernetes/aws/deployment.yaml
       - kubectl apply -f .kubernetes/aws/hpa.yaml
       - kubectl apply -f .kubernetes/aws/ing.yaml
-      - kubectl apply -f .kubernetes/aws/deployment.yaml
       - kubectl apply -f .kubernetes/aws/svc.yaml
 
       - echo Start rollout...   
