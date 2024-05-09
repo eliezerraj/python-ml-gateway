@@ -49,26 +49,26 @@ spec:
         - name: http
           containerPort: 5010
           protocol: TCP
-        #readinessProbe:
-        #    httpGet:
-        #      path: /health
-        #      port: http
-        #    initialDelaySeconds: 2
-        #    periodSeconds: 30
-        #    failureThreshold: 3
-        #    successThreshold: 1
-        #    timeoutSeconds: 30
-        #livenessProbe:
-        #    exec:
-        #      command:
-        #      - /bin/sh
-        #      - -c
-        #      - "ps -A | grep py-ml-gateway | grep -v grep"
-        #    initialDelaySeconds: 3
-        #    periodSeconds: 30
-        #    failureThreshold: 3
-        #    successThreshold: 1
-        #    timeoutSeconds: 5
+        readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 30
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 30
+        livenessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - "ps -A | grep py-ml-gateway | grep -v grep"
+            initialDelaySeconds: 3
+            periodSeconds: 30
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 5
         lifecycle:
           preStop:
             exec:

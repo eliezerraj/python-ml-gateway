@@ -19,12 +19,15 @@ DATASET_PATH = "s3://eliezerraj-908671954593-dataset/customer/customer_encoded_d
 ENDPOINT_NAME_1 = "kmeans-serverless-ep-customer-model-v3-2024-05-01-02-15-43"
 ENDPOINT_NAME_2 = "xgboost-serverless-ep-fraud-model-v3-2024-04-23-00-41-40"
 ENDPOINT_NAME_3 = "rcf-serverless-ep-payment-anomaly-model-v1-2024-05-06-13-40-27"
+
 PORT = 5010
 API_VERSION = "1.0"
-POD_NAME = "py-ml-sagemaker"
+POD_NAME = "py-ml-sagemaker.local"
 
-client = boto3.client(service_name="sagemaker")
-runtime = boto3.client(service_name="sagemaker-runtime")
+client = boto3.client(  service_name="sagemaker",
+                        region_name='us-east-2')
+runtime = boto3.client( service_name="sagemaker-runtime",
+                        region_name='us-east-2')
 
 # -------- install libraries ------------------
 def install(package):
@@ -50,9 +53,9 @@ def data_scale(df_new_customer_data):
 def init():
     print("---- init ----")
 
-    PORT = os.environ['PORT']
-    API_VERSION = os.environ['API_VERSION']
-    POD_NAME = os.environ['POD_NAME']
+    PORT = os.environ.get('PORT', 5010)
+    API_VERSION = os.environ.get('API_VERSION','1.0')
+    POD_NAME = os.environ.get('POD_NAME','py-ml-sagemaker.local')
 
     SCALER_PATH = "s3://eliezerraj-908671954593-dataset/customer/scaler.joblib"
     DATASET_PATH = "s3://eliezerraj-908671954593-dataset/customer/customer_encoded_data.csv"
@@ -206,7 +209,6 @@ def payment_anomaly():
 
     content_type = 'text/csv'
     payload =  str(data['amount']) + ',' + str(data['tx_1d']) + ',' + str(data['avg_1d']) + ',' + str(data['tx_7d']) + ',' + str(data['avg_7d']) + ',' + str(data['tx_30d']) + ',' + str(data['avg_30d']) + ',' + str(data['time_btw_cc_tx'])
-
     #payload = '9.0,23.0,7.0,90.0,4.0,365.0,17.0,263.0,28.0,238.0,97582.0'
 
     response = runtime.invoke_endpoint(
@@ -223,13 +225,16 @@ def payment_anomaly():
 
 # --------- main  -------------------------
 if __name__ == '__main__':
-
+    print("---- main ----")
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--req")
     args = parser.parse_args()
 
     if args.req == 's':
         install_requirements()
+
+    init()
 
     global df_customer 
     global scaler_load
@@ -238,6 +243,9 @@ if __name__ == '__main__':
     print("sklearn version: ", sklearn.__version__)
 
     # Show enviroments
+    print("==> POD_NAME: ", POD_NAME)
+    print("==> PORT: ",     PORT)
+    print("==> API_VERSION: ", API_VERSION)
     print("==> scaler_path: ", SCALER_PATH)
     print("==> dataset_path: ", DATASET_PATH)
     print("==> endpoint_name_1: ", ENDPOINT_NAME_1)
@@ -258,6 +266,7 @@ if __name__ == '__main__':
 
     with fs.open(scaler_path, 'rb') as f:
         scaler_load = joblib.load(f)
-    print("==> Model loaded !!!")
+     print("==> Model loaded !!!")
 
-    app.run(port=PORT)
+    app.run(host='0.0.0.0',
+            port=PORT)
