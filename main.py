@@ -266,7 +266,7 @@ if __name__ == '__main__':
 
     with fs.open(scaler_path, 'rb') as f:
         scaler_load = joblib.load(f)
-     print("==> Model loaded !!!")
+    print("==> Model loaded !!!")
 
     app.run(host='0.0.0.0',
             port=PORT)

@@ -7,6 +7,10 @@ metadata:
     app: *app-name
 data:
   API_VERSION: "1.0"
-  POD_NAME: "py-ml-gateway"
+  POD_NAME: "py-ml-gateway.k8"
   PORT: "5010"
-  NO_AZ: "true"
+  SCALER_PATH: "s3://eliezerraj-908671954593-dataset/customer/scaler.joblib"
+  DATASET_PATH: "s3://eliezerraj-908671954593-dataset/customer/customer_encoded_data.csv"
+  ENDPOINT_NAME_1: "kmeans-serverless-ep-customer-model-v3-2024-05-01-02-15-43"
+  ENDPOINT_NAME_2: "xgboost-serverless-ep-fraud-model-v3-2024-04-23-00-41-40"
+  ENDPOINT_NAME_3: "rcf-serverless-ep-payment-anomaly-model-v1-2024-05-06-13-40-27"
