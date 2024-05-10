@@ -14,16 +14,6 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-SCALER_PATH = "s3://eliezerraj-908671954593-dataset/customer/scaler.joblib"
-DATASET_PATH = "s3://eliezerraj-908671954593-dataset/customer/customer_encoded_data.csv"
-ENDPOINT_NAME_1 = "kmeans-serverless-ep-customer-model-v3-2024-05-01-02-15-43"
-ENDPOINT_NAME_2 = "xgboost-serverless-ep-fraud-model-v3-2024-04-23-00-41-40"
-ENDPOINT_NAME_3 = "rcf-serverless-ep-payment-anomaly-model-v1-2024-05-06-13-40-27"
-
-PORT = 5010
-API_VERSION = "1.0"
-POD_NAME = "py-ml-sagemaker.local"
-
 client = boto3.client(  service_name="sagemaker",
                         region_name='us-east-2')
 runtime = boto3.client( service_name="sagemaker-runtime",
@@ -52,6 +42,16 @@ def data_scale(df_new_customer_data):
 # --------- init  ---------------------------
 def init():
     print("---- init ----")
+
+    global SCALER_PATH
+    global DATASET_PATH
+    global ENDPOINT_NAME_1
+    global ENDPOINT_NAME_2
+    global ENDPOINT_NAME_3
+
+    global PORT
+    global API_VERSION
+    global POD_NAME
 
     PORT = os.environ.get('PORT', 5010)
     API_VERSION = os.environ.get('API_VERSION','1.0')
@@ -222,7 +222,6 @@ def payment_anomaly():
     print(y_predict)
     res = json.loads(y_predict)
     return res['scores'][0], 200
-
 # --------- main  -------------------------
 if __name__ == '__main__':
     print("---- main ----")
