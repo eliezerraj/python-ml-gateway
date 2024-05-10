@@ -8,11 +8,19 @@ import boto3
 import sklearn
 import argparse
 import math
+
+import threading
+import signal
+import time
+
 from sagemaker import Session
 from sagemaker import get_execution_role
 from flask import Flask, jsonify, request
 
+app_name = 'py-ml-gateway'
 app = Flask(__name__)
+
+shutdown_flag = threading.Event()
 
 client = boto3.client(  service_name="sagemaker",
                         region_name='us-east-2')
@@ -64,16 +72,33 @@ def init():
     ENDPOINT_NAME_3 = "rcf-serverless-ep-payment-anomaly-model-v1-2024-05-06-13-40-27"
 
 # --------- route  ---------------------------
+@app.route('/shutdown', methods=['GET'])
+def shutdown():
+    print("---- /shutdown ----")
+
+    print("---- start task-1 ----")
+    time.sleep(5)
+    print("--- finish task-1 ----")
+
+    res = {
+            'status': 'SUCCESS',
+        }
+    return res, 200
+
 @app.route('/health', methods=['GET'])
 def health():
     print("---- /health ----")
-    res = "true"
+    res = {
+            'status': 'SUCCESS',
+        }
     return res, 200
 
 @app.route('/live', methods=['GET'])
 def live():
     print("---- /live ----")
-    res = "true"
+    res = {
+            'status': 'SUCCESS',
+        }
     return res, 200
 
 @app.route('/info', methods=['GET'])
@@ -222,19 +247,17 @@ def payment_anomaly():
     print(y_predict)
     res = json.loads(y_predict)
     return res['scores'][0], 200
+
 # --------- main  -------------------------
-if __name__ == '__main__':
+def sigterm_handler(signum, frame):
+    print("---- sigterm_handler ----")
+    shutdown_flag.set()
+    print("Shutdown request from k8 !!!!")
+
+# --------- main  -------------------------
+def main():
     print("---- main ----")
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--req")
-    args = parser.parse_args()
-
-    if args.req == 's':
-        install_requirements()
-
-    init()
-
     global df_customer 
     global scaler_load
 
@@ -267,5 +290,26 @@ if __name__ == '__main__':
         scaler_load = joblib.load(f)
     print("==> Model loaded !!!")
 
-    app.run(host='0.0.0.0',
+    while not shutdown_flag.is_set():
+        try:
+            app.run(host='0.0.0.0',
             port=PORT)
+        except KeyboardInterrupt:
+            shutdown_flag.set()
+
+    # Shutdown tasks !!!!
+    print("Shutting down...")
+
+# --------- main  -------------------------
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--req")
+    args = parser.parse_args()
+
+    if args.req == 's':
+        install_requirements()
+
+    init()
+
+    main()
