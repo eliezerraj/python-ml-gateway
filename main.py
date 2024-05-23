@@ -174,7 +174,8 @@ def customer_classification():
     y_predict = response["Body"].read().decode()
     print(y_predict)
 
-    return y_predict, 200
+    res = json.loads(y_predict)
+    return res, 200
 
 @app.route('/payment/fraudPredict', methods=['POST'])
 def payment_fraudPredict():
@@ -290,13 +291,14 @@ def main():
         scaler_load = joblib.load(f)
     print("==> Model loaded !!!")
 
-    while not shutdown_flag.is_set():
-        try:
-            app.run(host='0.0.0.0',
-            port=PORT)
-        except KeyboardInterrupt:
-            shutdown_flag.set()
-
+    ##while not shutdown_flag.is_set():
+    ##    try:
+    ##        app.run(host='0.0.0.0',
+    ##        port=PORT)
+    ##    except KeyboardInterrupt:
+    ##        shutdown_flag.set()
+    
+    app.run(host='0.0.0.0', port=PORT)
     # Shutdown tasks !!!!
     print("Shutting down...")
 
