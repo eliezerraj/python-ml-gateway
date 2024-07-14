@@ -30,10 +30,10 @@ spec:
             name: py-ml-gateway-cm
         resources:
            requests:
-             cpu: 100m
-             memory: 50Mi
-           limits:
-             cpu: 200m
+             cpu: 10m
+             memory: 150Mi
+           #limits:
+             #cpu: 200m
              #memory: 150Mi
         securityContext:
           seccompProfile:
